@@ -1,0 +1,477 @@
+syntax = "proto2";
+
+// Legacy protobuf namespace inherited from the original BadConga project.
+//
+// IMPORTANT:
+// The "badconga_proto" package name is intentionally preserved.
+//
+// CongaMate is a modernized fork of the original BadConga project by adrigzr.
+// The protobuf schema and the underlying Cecotec/Conga protocol reverse
+// engineering originate from that work.
+//
+// Keeping the original protobuf namespace is therefore a conscious decision:
+//  - it preserves compatibility with the protocol implementation inherited
+//    from BadConga;
+//  - it documents the technical provenance of this part of CongaMate;
+//  - it avoids presenting the original reverse-engineering work as new work.
+//
+// This package name is unrelated to the Home Assistant integration domain,
+// which is "congamate".
+//
+// This is NOT a leftover from an incomplete rename.
+//
+// Do not rename this protobuf package casually. Changing it requires
+// regenerating schema_pb2.py and fully retesting protocol parsing.
+//
+// Original BadConga and protocol reverse engineering: adrigzr.
+// CongaMate modernization and Conga 3290 testing: Magius (@magius-tr).
+package badconga_proto;
+
+message SMSG_ERROR {
+    required int32 result = 1;
+    required string error = 2;
+    required int32 opcode = 3;
+}
+
+message CMSG_SERVER_CHECK { }
+
+message SMSG_SERVER_CHECK { }
+
+message CMSG_USER_LOGIN {
+    required string email = 1;
+    required string password = 2;
+    required int32 unk1 = 4;
+}
+
+message SMSG_USER_LOGIN {
+    message Unk {
+        required int32 unk1 = 1;
+        required int32 unk2 = 2;
+    }
+
+    message Body {
+        required int32 userId = 1;
+        required string sessionId = 2;
+        required bool remember = 3;
+        required int32 deviceId = 5;
+        required Unk unk = 6;
+    }
+
+    required int32 result = 1;
+    required Body body = 3;
+}
+
+message CMSG_SESSION_LOGIN {
+    required string sessionId = 1;
+    required bool isPwd = 2;
+    required int32 unk1 = 3;
+    required int32 unk2 = 4;
+    required string unk3 = 5;
+}
+
+message SMSG_SESSION_LOGIN {
+    required int32 result = 1;
+}
+
+message CMSG_DEVICE_INFO {
+    required string sessionId = 1;
+    required int32 deviceId = 2;
+}
+
+message SMSG_DEVICE_INFO {
+    message TaskList {
+        required int32 orderId = 1;
+        required bool enable = 2;
+        required bool repeat = 3;
+        required int32 weekday = 4;
+        required int32 day_time = 5;
+    }
+
+    message Voice {
+        required bool voiceMode = 1;
+        required bool volume = 2;
+    }
+
+    message Config {
+        required bool ecoMode = 1;
+        required bool repeatClean = 2;
+        required bool brokenEnable = 3;
+        required bool carpetTurbo = 4;
+        required bool historyMapEnable = 5;
+    }
+
+    message DeviceInfo {
+        required int32 deviceId = 1;
+        required Voice voice = 2;
+        required Config config = 3;
+        required TaskList taskList = 4;
+        required OTA ota = 5;
+        required Status status = 7;
+    }
+
+    message OTA {
+        required bool newVersion = 1;
+        required string packageSize = 2;
+        required string systemVersion = 3;
+        required string otaPackageVersion = 4;
+        required string remoteUrl = 5;
+        required bool forceupgrade = 6;
+    }
+
+    message Status {
+        required bool isOpen = 1;
+        required int32 beginTime = 2;
+        required int32 endTime = 3;
+    }
+
+    required int32 result = 1;
+    required DeviceInfo body = 3;
+}
+
+message CMSG_DEVICE_LIST {
+    required int32 userId = 1;
+    required string sessionId = 2;
+    required bool unk1 = 3;
+}
+
+message SMSG_DEVICE_LIST {
+    message DeviceList {
+        required string serialNumber = 1;
+        required int32 deviceId = 2;
+        required int32 ctime = 3;
+        required bool status = 4;
+        required string alias = 5;
+        required bool defaultId = 6;
+        required string version = 7;
+        required bool deviceAdmin = 8;
+        required int32 deviceType = 9;
+        required int32 powerValue = 10;
+        required string ctrlVersion = 11;
+    }
+
+    message Body {
+        required DeviceList deviceList = 1;
+    }
+
+    required int32 result = 1;
+    required Body body = 3;
+}
+
+message CMSG_DEVICE_POWER {
+    required string sessionId = 1;
+    required int32 deviceId = 2;
+}
+
+message SMSG_DEVICE_POWER {
+    message Power {
+        required int32 value = 1;
+    }
+
+    message Body {
+        required int32 deviceId = 1;
+        required Power power = 2;
+        required bool status = 3;
+    }
+
+    required int32 result = 1;
+    required Body body = 3;
+}
+
+message CMSG_CLEAN_RECORDS {
+    required string sessionId = 1;
+    required int32 deviceId = 2;
+    required int32 fromDate = 3;
+    required int32 toDate = 4;
+}
+
+message SMSG_CLEAN_RECORDS {
+    message Config {
+        required bool ecoMode = 1;
+        required bool repeatClean = 2;
+        required int32 waterLevel = 6;
+    }
+
+    message CleanTask {
+        required int32 taskId = 1;
+        required int32 beginTime = 2;
+        required int32 endTime = 3;
+        required int32 totalArea = 4;
+        required int32 totalTime = 5;
+        required int32 cleanType = 6;
+        required bool status = 7;
+        required Config config = 8;
+        required int32 mapId = 9;
+        required string mapName = 10;
+        required string planName = 11;
+    }
+
+    message Body {
+        repeated CleanTask cleanTask = 1;
+    }
+
+    required int32 result = 1;
+    required Body body = 3;
+}
+
+message CMSG_PING {}
+
+message SMSG_PING {
+    required int32 result = 1;
+}
+
+message CMSG_CONNECT_DEVICE {}
+
+message SMSG_DEVICE_STATUS {
+    required int32 mapHeadId = 1;
+    required int32 areaCleanFlag = 2;
+    required int32 workMode = 3;
+    required int32 battery = 4;
+    required bool chargeStatus = 5;
+    required int32 type = 6;
+    required int32 faultCode = 7;
+    required int32 cleanPreference = 8;
+    required int32 repeatClean = 9;
+    required int32 cleanTime = 10;
+    required int32 cleanSize = 11;
+    required int32 waterLevel = 12;
+    required int32 dustBoxType = 13;
+    required bool mopType = 14;
+}
+
+message CMSG_DEVICE_TIME {}
+
+message SMSG_DEVICE_TIME {
+    message Body {
+        required int32 deviceTime = 1;
+        required int32 deviceTimezone = 2;
+    }
+
+    required int32 result = 1;
+    required Body body = 3;
+}
+
+message CMSG_MAP_INFO {
+    required int32 mask = 1;
+}
+
+message CMSG_CTRL_TYPE {
+    required int32 mapHeadId = 1;
+    required int32 ctrlType = 3;
+}
+
+message SMSG_CTRL_TYPE {
+    required int32 result = 1;
+    required int32 ctrlType = 3;
+}
+
+message SMSG_DEVICE_BUSY {
+    required int32 result = 1;
+}
+
+message CMSG_LOCATE_DEVICE {}
+
+message SMSG_LOCATE_DEVICE {
+    required int32 result = 1;
+}
+
+message SMSG_USER_KICK {
+    required int32 result = 1;
+    required string reason = 2;
+}
+
+message SMSG_DISCONNECT {}
+
+message CMSG_DISCONNECT_DEVICE {}
+
+message SMSG_DISCONNECT_DEVICE {
+    required int32 result = 1;
+}
+
+message CMSG_CLEAN_MODE {
+    required int32 mode = 1;
+    required int32 unk2 = 2;
+}
+
+message SMSG_CLEAN_MODE {}
+
+message CMSG_RETURN_HOME {
+    required int32 unk1 = 1;
+}
+
+message SMSG_RETURN_HOME {
+    required int32 result = 1;
+}
+
+message CMSG_SET_FAN_MODE {
+    required int32 mode = 1;
+}
+
+message SMSG_SET_FAN_MODE {
+    required int32 result = 1;
+}
+
+message CMSG_SET_CLEAN_MODE {
+    required int32 mode = 1;
+}
+
+message CMSG_UNK_1 {
+    required int32 unk1 = 1;
+    required bytes unk2 = 2;
+}
+
+message SMSG_UNK_1 {
+    required int32 result = 1;
+}
+
+message CMSG_USER_LOGOUT {
+    required int32 userId = 1;
+    required string sessionId = 2;
+}
+
+message SMSG_USER_LOGOUT {
+    required int32 result = 1;
+}
+
+message SMSG_DEVICE_INUSE {
+    required int32 result = 1;
+}
+
+message RobotPose {
+    required int32 id = 1;
+    required float x = 2;
+    required float y = 3;
+    required float phi = 4;
+}
+
+message RobotPosition {
+    required int32 mapHeadId = 1;
+    required bool update = 2;
+    required RobotPose pose = 3;
+}
+
+message StatusInfo {
+    required int32 mapHeadId = 2;
+    required int32 hasHistoryMap = 3;
+    required int32 workingMode = 4;
+    required int32 batteryPercent = 5;
+    required int32 chargeState = 6;
+    required int32 faultType = 7;
+    required int32 faultCode = 8;
+    required int32 cleanPreference = 9;
+    required int32 repeatClean = 10;
+    required int32 cleanTime = 11;
+    required int32 cleanSize = 12;
+}
+
+message MapHeadInfo {
+    required int32 mapHeadId = 1;
+    required int32 mapValid = 2;
+    required int32 mapType = 3;
+    required int32 sizeX = 4;
+    required int32 sizeY = 5;
+    required float minX = 6;
+    required float minY = 7;
+    required float maxX = 8;
+    required float maxY = 9;
+    required float resolution = 10;
+}
+
+message HistoryHeadInfo {
+    required int32 mapHeadId = 1;
+    required int32 pointNumber = 2;
+    required int32 poseId = 3;
+}
+
+message RobotChargeInfo {
+    required int32 mapHeadId = 1;
+    required float poseX = 2;
+    required float poseY = 3;
+    required float posePhi = 4;
+}
+
+message ListInfo {
+    required int32 mapHeadId = 1;
+    required int32 cleanPlanId = 2;
+    required int32 areaCount = 3;
+}
+
+message SpotInfo {
+    required int32 mapHeadId = 1;
+    required int32 ctrlValue = 2;
+    required float poseX = 3;
+    required float poseY = 4;
+    required float posePhi = 5;
+}
+
+message RobotPoseInfo {
+    required int32 mapHeadId = 1;
+    required int32 poseId = 2;
+    required int32 update = 3;
+    required float poseX = 4;
+    required float poseY = 5;
+    required float posePhi = 6;
+}
+
+message CleanPlanInfo {
+    required int32 mapHeadId = 1;
+    required int32 mask = 2;
+    required int32 firstCleanFlag = 3;
+}
+
+message MapInfo {
+    required int32 mapHeadId = 1;
+    required string mapName = 2;
+    required int32 currentCleanPlanId = 3;
+    required int32 taskId = 4;
+}
+
+message CleanRoom {
+    required int32 id = 1;
+    required string name = 2;
+    required int32 state = 3;
+    required float x = 4;
+    required float y = 5;
+}
+
+message AreaInfo {
+    required int32 id = 1;
+    required int32 type = 2;
+    repeated float x = 3;
+    repeated float y = 4;
+}
+
+message CleanRoomInfo {
+    required int32 id = 1;
+    required int32 type = 2;
+}
+
+message CleanPlan {
+    required int32 id = 1;
+    required string name = 2;
+    required int32 mapHeadId = 3;
+    repeated AreaInfo areaInfoList = 4;
+    repeated CleanRoomInfo cleanRoomInfoList = 5;
+}
+
+message RoomEnableInfo {
+    required int32 mapHeadId = 1;
+    required int32 size = 2;
+}
+
+message MapUpdate {
+    required int32 mask = 1;
+    required StatusInfo statusInfo = 2;
+    required MapHeadInfo mapHeadInfo = 3;
+    required bytes mapGrid = 4;
+    required HistoryHeadInfo historyHeadInfo = 5;
+    required RobotChargeInfo robotChargeInfo = 6;
+    required ListInfo wallListInfo = 7;
+    required ListInfo areaListInfo = 8;
+    required SpotInfo spotInfo = 9;
+    required RobotPoseInfo robotPoseInfo = 10;
+    required CleanPlanInfo cleanPlanInfo = 11;
+    repeated MapInfo mapInfoList = 12;
+    repeated CleanRoom cleanRoomList = 13;
+    repeated CleanPlan cleanPlanList = 14;
+    required RoomEnableInfo roomEnableInfo = 15;
+}

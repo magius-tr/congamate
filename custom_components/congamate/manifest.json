@@ -1,0 +1,10 @@
+{
+  "domain": "congamate",
+  "name": "CongaMate",
+  "manifest_version": 2,
+  "version": "0.2.0",
+  "codeowners": [
+    "@magius-tr"
+  ],
+  "requirements": []
+}
