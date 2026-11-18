@@ -157,6 +157,15 @@ The repository also contains HACS metadata. Distribution and installation
 through HACS should be considered preliminary until the public CongaMate
 repository has been validated end to end.
 
+## Live map refresh
+
+Since 0.2.1, live map updates invalidate the Home Assistant camera image
+when a new map is pushed by the robot.
+
+This makes Lovelace request the newly rendered map automatically while
+cleaning, so robot movement and cleaning progress can be followed without
+manual browser refresh or frontend polling.
+
 ## Roadmap
 
 CongaMate already reads map, room and cleaning-plan structures from the

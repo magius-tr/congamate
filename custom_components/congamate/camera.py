@@ -36,9 +36,10 @@ class CongaMapCamera(Camera):
             "update_map",
             self._handle_map_update,
         )
+
         self.instance.client.on(
             "update_position",
-            self._handle_map_update,
+            self._handle_position_update,
         )
 
     @property
@@ -47,8 +48,8 @@ class CongaMapCamera(Camera):
         alias = self.instance.client.device.alias or "Conga"
         return f"{alias} Map"
 
-    def _handle_map_update(self):
-        """Transfer protocol-thread updates safely to Home Assistant."""
+    def _schedule_ha_update(self, *, refresh_image=False):
+        """Transfer a protocol-thread update safely to Home Assistant."""
         if self.hass is None:
             return
 
@@ -56,12 +57,29 @@ class CongaMapCamera(Camera):
         if loop.is_closed():
             return
 
+        def update():
+            if refresh_image:
+                # Home Assistant camera images use entity_picture with an
+                # access token. Rotating the token changes the image URL,
+                # prompting Lovelace to request the newly rendered map.
+                self.async_update_token()
+
+            self.async_write_ha_state()
+
         try:
-            loop.call_soon_threadsafe(
-                self.async_write_ha_state
-            )
+            loop.call_soon_threadsafe(update)
         except RuntimeError:
+            # Home Assistant can close the event loop while protocol threads
+            # are delivering their final updates during shutdown.
             return
+
+    def _handle_map_update(self):
+        """Publish a newly received map image to Home Assistant."""
+        self._schedule_ha_update(refresh_image=True)
+
+    def _handle_position_update(self):
+        """Publish robot position state without forcing an image reload."""
+        self._schedule_ha_update(refresh_image=False)
 
     def camera_image(self, width=None, height=None):
         """Return the most recently rendered Conga map."""
