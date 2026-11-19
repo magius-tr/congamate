@@ -95,7 +95,8 @@ class Client(Evented):
         self.session_id = None
         self.builder = Builder()
         self.device = Device()
-        self.map = Map()
+        # Preserve the last valid map, robot pose and charger pose.
+        # A disconnect means the map is stale, not that it never existed.
         self.trigger('update_device')
         self.trigger('logout')
 
@@ -155,6 +156,35 @@ class Client(Evented):
         self.device.firmware_version = schema.body.deviceList.version
         self.device.controller_version = schema.body.deviceList.ctrlVersion
         self.device.model = schema.body.deviceList.deviceType
+
+        # Publish a stable technical identity only after DEVICE_LIST
+        # has supplied it. The alias is presentation data and may be
+        # empty or change later.
+        serial = str(
+            self.device.serial_number or ""
+        ).strip()
+
+        if serial and serial.lower() not in {
+            "0",
+            "none",
+            "null",
+            "unknown",
+        }:
+            alias = str(
+                self.device.alias or ""
+            ).strip()
+
+            self.trigger(
+                "identity_ready",
+                {
+                    "serial": serial,
+                    "alias": alias,
+                    "model": self.device.model,
+                    "firmware": self.device.firmware_version,
+                    "revision": self.device.controller_version,
+                },
+            )
+
 
     def handle_user_kick(self, schema):
         """ handle_user_kick """
